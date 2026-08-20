@@ -1,0 +1,43 @@
+# Dependencies
+frontend/node_modules/
+
+# Frontend build output
+frontend/dist/
+frontend/.vite/
+
+# Java / Maven build output
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+
+# IDE settings
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
