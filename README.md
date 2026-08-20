@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Sistema de Gestión para Supermercado
 
 Aplicación web para administrar la operación de un supermercado: inventario, compras, ventas, clientes, empleados, reportes y auditoría.
@@ -117,3 +118,7 @@ mvn test
 ## Seguridad
 
 No hay registro público. Los empleados y sus roles son administrados por usuarios con rol `ADMIN`. Las credenciales de la base de datos y el secreto JWT deben proporcionarse mediante variables de entorno en producción.
+=======
+# supermarket-management
+Full-stack supermarket management system featuring inventory, purchasing, point of sale (POS), customer and employee management, reporting, and audit tracking.
+>>>>>>> 35b818f6bf9fa34d6c5a4c99f4deebdb6c5e00ab
