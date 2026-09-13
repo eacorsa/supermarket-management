@@ -10,6 +10,8 @@ public class ProductResponse {
     private String name;
     private String sku;
     private String categoryName;
+    private Long categoryId;
+    private Long supplierId;
     private String supplierName;
     private Double purchasePrice;
     private Double salePrice;

@@ -1,6 +1,7 @@
 package com.supermercado.service.impl;
 
 import com.supermercado.dto.CreateEmployeeRequest;
+import com.supermercado.dto.UpdateEmployeeRequest;
 import com.supermercado.dto.EmployeeResponse;
 import com.supermercado.dto.UpdateEmployeeRolesRequest;
 import com.supermercado.entity.Role;
@@ -58,6 +59,21 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IllegalArgumentException("Employee not found");
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public EmployeeResponse updateEmployee(Long id, UpdateEmployeeRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+        Set<Role> roles = resolveRoles(request.getRoles());
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setRoles(roles);
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        return toResponse(userRepository.save(user));
     }
 
     private Set<Role> resolveRoles(Set<String> roleNames) {

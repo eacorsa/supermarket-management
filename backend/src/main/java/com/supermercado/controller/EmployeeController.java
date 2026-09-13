@@ -1,6 +1,7 @@
 package com.supermercado.controller;
 
 import com.supermercado.dto.CreateEmployeeRequest;
+import com.supermercado.dto.UpdateEmployeeRequest;
 import com.supermercado.dto.EmployeeResponse;
 import com.supermercado.dto.UpdateEmployeeRolesRequest;
 import com.supermercado.service.EmployeeService;
@@ -33,6 +34,11 @@ public class EmployeeController {
     @PutMapping("/{id}/roles")
     public ResponseEntity<EmployeeResponse> updateEmployeeRoles(@PathVariable Long id, @Valid @RequestBody UpdateEmployeeRolesRequest request) {
         return ResponseEntity.ok(employeeService.updateEmployeeRoles(id, request));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable Long id, @Valid @RequestBody UpdateEmployeeRequest request) {
+        return ResponseEntity.ok(employeeService.updateEmployee(id, request));
     }
 
     @DeleteMapping("/{id}")

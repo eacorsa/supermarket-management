@@ -30,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Product product = new Product();
+        validateSku(request.getSku(), null);
         applyRequest(product, request);
 
         Product saved = productRepository.save(product);
@@ -49,6 +50,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        validateSku(request.getSku(), id);
         applyRequest(product, request);
         return toResponse(productRepository.save(product));
     }
@@ -89,11 +91,21 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    private void validateSku(String sku, Long id) {
+        productRepository.findBySku(sku).ifPresent(existing -> {
+            if (!existing.getId().equals(id)) {
+                throw new IllegalArgumentException("Ya existe un producto con ese SKU");
+            }
+        });
+    }
+
     private ProductResponse toResponse(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
         response.setSku(product.getSku());
+        response.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        response.setSupplierId(product.getSupplier() != null ? product.getSupplier().getId() : null);
         response.setPurchasePrice(product.getPurchasePrice());
         response.setSalePrice(product.getSalePrice());
         response.setStock(product.getStock());
