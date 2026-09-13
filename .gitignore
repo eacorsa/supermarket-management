@@ -42,12 +42,5 @@ Desktop.ini
 *.swp
 *~
 
-# Local project documentation and assistant context
-/README.md
-/AGENTS.md
-/MEMORY.md
-/.github/copilot-instructions.md
-/.github/modernize/
-/docs/qa-correcciones-2026-09-13.md
 /prompt-sistema-supermercado.md
 /usuarios.txt
