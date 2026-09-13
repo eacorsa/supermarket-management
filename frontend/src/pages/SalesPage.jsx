@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { getRoles } from '../utils/jwt';
 import NavBar from '../components/NavBar';
 
 function SalesPage() {
+  const [selectedSaleId, setSelectedSaleId] = useState(null);
+  const canCancel = getRoles().some(role => ['ADMIN', 'GERENTE'].includes(role));
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState('EFECTIVO');
@@ -35,6 +38,8 @@ function SalesPage() {
     setCart((prev) => prev.filter((item) => item.productId !== productId));
   };
 
+  const selectedSale = sales.find(sale => sale.id === selectedSaleId);
+  const money = value => Number(value ?? 0).toFixed(2);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleCheckout = async () => {
@@ -128,12 +133,25 @@ function SalesPage() {
               <td>{sale.paymentMethod}</td>
               <td><span className={`badge ${sale.status === 'COMPLETADA' ? 'badge-success' : 'badge-danger'}`}>{sale.status}</span></td>
               <td>
-                {sale.status === 'COMPLETADA' && <button className="btn-danger" onClick={() => handleCancel(sale.id)}>Anular</button>}
+                <button onClick={() => setSelectedSaleId(sale.id)}>Ver detalle</button>{' '}
+                {canCancel && sale.status === 'COMPLETADA' && <button className="btn-danger" onClick={() => handleCancel(sale.id)}>Anular</button>}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {selectedSale && <section className="card" aria-label="Detalle de venta">
+        <h3>Detalle de venta #{selectedSale.id}</h3>
+        <p>Fecha: {selectedSale.saleDate ? new Date(selectedSale.saleDate).toLocaleString('es-MX') : '—'}</p>
+        <p>Cliente: {selectedSale.customerName} · Cajero: {selectedSale.cashierName || '—'}</p>
+        <p>Estado: {selectedSale.status} · Pago: {selectedSale.paymentMethod}</p>
+        <table className="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio unitario</th><th>Subtotal</th></tr></thead>
+          <tbody>{(selectedSale.details ?? []).map((item, index) => <tr key={index}><td>{item.productName}</td><td>{item.quantity}</td><td>${money(item.unitPrice)}</td><td>${money(item.subtotal)}</td></tr>)}</tbody>
+        </table>
+        <p>Subtotal: ${money(selectedSale.subtotal)} · Impuestos: ${money(selectedSale.tax)} · Descuento: ${money(selectedSale.discount)}</p>
+        <p><strong>Total: ${money(selectedSale.total)}</strong></p>
+        <button onClick={() => setSelectedSaleId(null)}>Cerrar detalle</button>
+      </section>}
       </div>
     </div>
   );
