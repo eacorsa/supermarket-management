@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.net.URI;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,8 +69,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void applyRequest(Product product, CreateProductRequest request) {
+        String imageUrl = validateImageUrl(request.getImageUrl());
         product.setName(request.getName());
         product.setSku(request.getSku());
+        product.setImageUrl(imageUrl);
         product.setPurchasePrice(request.getPurchasePrice());
         product.setSalePrice(request.getSalePrice());
         product.setStock(request.getStock());
@@ -91,6 +94,21 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    private String validateImageUrl(String value) {
+        if (value == null || value.isBlank()) return null;
+        String imageUrl = value.strip();
+        try {
+            URI uri = URI.create(imageUrl);
+            if (("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme()))
+                    && uri.getHost() != null && uri.getUserInfo() == null) {
+                return imageUrl;
+            }
+        } catch (IllegalArgumentException ignored) {
+            // Return the same validation message for malformed and unsupported URLs.
+        }
+        throw new IllegalArgumentException("La imagen debe tener una URL HTTP o HTTPS válida, sin credenciales");
+    }
+
     private void validateSku(String sku, Long id) {
         productRepository.findBySku(sku).ifPresent(existing -> {
             if (!existing.getId().equals(id)) {
@@ -104,6 +122,7 @@ public class ProductServiceImpl implements ProductService {
         response.setId(product.getId());
         response.setName(product.getName());
         response.setSku(product.getSku());
+        response.setImageUrl(product.getImageUrl());
         response.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
         response.setSupplierId(product.getSupplier() != null ? product.getSupplier().getId() : null);
         response.setPurchasePrice(product.getPurchasePrice());

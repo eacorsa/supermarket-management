@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <rect width="160" height="160" rx="20" fill="#eef5e8"/>
+  <ellipse cx="80" cy="137" rx="40" ry="7" fill="#d9e6cb"/>
+  <path d="M48 25h64l9 109H39z" fill="#f9f3df" stroke="#d8c6a2" stroke-width="2"/>
+  <path d="M48 25h64l2 20H46zM41 114h78l2 20H39z" fill="#427d45"/>
+  <rect x="53" y="56" width="54" height="47" rx="9" fill="#fff"/>
+  <g fill="#e0c99a"><ellipse cx="68" cy="74" rx="3" ry="8" transform="rotate(-30 68 74)"/><ellipse cx="83" cy="69" rx="3" ry="8" transform="rotate(25 83 69)"/><ellipse cx="93" cy="83" rx="3" ry="8" transform="rotate(-25 93 83)"/><ellipse cx="77" cy="90" rx="3" ry="8" transform="rotate(40 77 90)"/></g>
+  <text x="80" y="125" text-anchor="middle" fill="white" font-family="sans-serif" font-size="10" font-weight="bold">ARROZ · 1 kg</text>
+</svg>

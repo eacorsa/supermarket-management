@@ -21,6 +21,9 @@ public class Product extends Auditable {
     @Column(nullable = false, unique = true)
     private String sku;
 
+    @Column(length = 2048)
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
