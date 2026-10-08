@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <rect width="160" height="160" rx="20" fill="#edf5fc"/>
+  <ellipse cx="80" cy="137" rx="40" ry="7" fill="#d4e4f0"/>
+  <path d="M48 25h64l9 109H39z" fill="#fff" stroke="#ccdbe8" stroke-width="2"/>
+  <path d="M48 25h64l3 25H45zM41 109h78l2 25H39z" fill="#409ac7"/>
+  <path d="m62 71 16-9 16 9-16 10z" fill="#f6f9fb" stroke="#bdcedc"/>
+  <path d="M62 71v19l16 9V81z" fill="#dce8f0" stroke="#bdcedc"/>
+  <path d="M78 81v18l16-9V71z" fill="#edf2f7" stroke="#bdcedc"/>
+  <text x="80" y="126" text-anchor="middle" fill="white" font-family="sans-serif" font-size="10" font-weight="bold">AZÚCAR · 1 kg</text>
+</svg>

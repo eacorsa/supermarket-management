@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { getRoles } from '../utils/jwt';
 import NavBar from '../components/NavBar';
+import ProductCatalog from '../components/ProductCatalog';
+import { apiError } from '../utils/apiError';
 
 function SalesPage() {
   const [selectedSaleId, setSelectedSaleId] = useState(null);
@@ -10,9 +12,14 @@ function SalesPage() {
   const [cart, setCart] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState('EFECTIVO');
   const [sales, setSales] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [checkingOut, setCheckingOut] = useState(false);
 
   const loadProducts = () => {
-    api.get('/products').then((res) => setProducts(res.data)).catch(() => alert('No se pudieron cargar los productos'));
+    setLoading(true);
+    setLoadError('');
+    return api.get('/products').then((res) => setProducts(res.data)).catch(() => setLoadError('No se pudieron cargar los productos')).finally(() => setLoading(false));
   };
 
   const loadSales = () => {
@@ -25,8 +32,10 @@ function SalesPage() {
   }, []);
 
   const addToCart = (product) => {
+    if (checkingOut) return;
     setCart((prev) => {
       const existing = prev.find((item) => item.productId === product.id);
+      if ((existing?.quantity || 0) >= product.stock) return prev;
       if (existing) {
         return prev.map((item) => (item.productId === product.id ? { ...item, quantity: item.quantity + 1 } : item));
       }
@@ -43,11 +52,13 @@ function SalesPage() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleCheckout = async () => {
+    if (checkingOut) return;
     if (cart.length === 0) {
       alert('Agrega productos antes de cobrar');
       return;
     }
     try {
+      setCheckingOut(true);
       await api.post('/sales', {
         paymentMethod,
         items: cart.map((item) => ({ productId: item.productId, quantity: item.quantity }))
@@ -57,8 +68,8 @@ function SalesPage() {
       loadSales();
       alert('Venta registrada');
     } catch (error) {
-      alert(error.response?.data ?? 'No se pudo registrar la venta');
-    }
+      alert(apiError(error, 'No se pudo registrar la venta'));
+    } finally { setCheckingOut(false); }
   };
 
   const handleCancel = async (id) => {
@@ -74,46 +85,41 @@ function SalesPage() {
   return (
     <div>
       <NavBar />
-      <div className="page-container">
-      <h2>Ventas (POS)</h2>
+      <div className="page-container catalog-page">
+      <div className="catalog-page-heading"><div><span className="page-eyebrow">CATÁLOGO / PUNTO DE VENTA</span><h1>Encuentra, agrega y vende</h1><p>Selecciona los productos para preparar la venta.</p></div><a className="cart-indicator" href="#sale-cart">Carrito <span>{cart.reduce((sum, item) => sum + item.quantity, 0)}</span></a></div>
 
-      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-        <div className="card" style={{ flex: 1, minWidth: 280 }}>
-          <h3>Productos</h3>
-          <ul>
-            {products.map((product) => (
-              <li key={product.id} style={{ marginBottom: 6 }}>
-                {product.name} - ${product.salePrice} (stock: {product.stock})
-                <button className="btn-secondary" style={{ marginLeft: 8 }} onClick={() => addToCart(product)}>Agregar</button>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="pos-layout">
+        <ProductCatalog products={products} loading={loading} error={loadError} onRetry={loadProducts} renderAction={product => {
+          const quantity = cart.find(item => item.productId === product.id)?.quantity || 0;
+          return <button className="product-add-button" disabled={checkingOut || product.stock <= quantity} onClick={() => addToCart(product)} aria-label={`Agregar ${product.name} al carrito`}><span aria-hidden="true">+</span>{product.stock <= quantity ? product.stock <= 0 ? 'Agotado' : 'Límite de stock' : quantity ? `Agregar (${quantity})` : 'Agregar'}</button>;
+        }} />
 
-        <div className="card" style={{ flex: 1, minWidth: 280 }}>
-          <h3>Carrito</h3>
-          <ul>
+        <aside id="sale-cart" className="card sale-cart" aria-label="Carrito de venta">
+          <div className="cart-heading"><h3>Tu carrito</h3><span className="badge badge-success">{cart.reduce((sum, item) => sum + item.quantity, 0)} artículos</span></div>
+          {cart.length === 0 && <div className="cart-empty"><span aria-hidden="true">▧</span><strong>El carrito está vacío</strong><p>Agrega productos del catálogo para comenzar.</p></div>}
+          <ul className="cart-items">
             {cart.map((item) => (
               <li key={item.productId}>
-                {item.name} x {item.quantity} = ${item.price * item.quantity}
-                <button className="btn-danger" style={{ marginLeft: 8 }} onClick={() => removeFromCart(item.productId)}>Quitar</button>
+                <div><strong>{item.name}</strong><span>{item.quantity} × ${money(item.price)}</span></div><strong>${money(item.price * item.quantity)}</strong>
+                <button className="product-delete-button" disabled={checkingOut} aria-label={`Quitar ${item.name} del carrito`} onClick={() => removeFromCart(item.productId)}>Quitar</button>
               </li>
             ))}
           </ul>
-          <p>Subtotal: ${subtotal.toFixed(2)}</p>
+          <div className="cart-subtotal"><span>Subtotal</span><strong>${subtotal.toFixed(2)}</strong></div>
+          <p className="cart-tax-note">El impuesto se calcula al registrar la venta.</p>
 
           <label>
             Método de pago:{' '}
-            <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+            <select disabled={checkingOut} value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
               <option value="EFECTIVO">Efectivo</option>
               <option value="TARJETA">Tarjeta</option>
               <option value="MIXTO">Mixto</option>
             </select>
           </label>
           <div style={{ marginTop: 12 }}>
-            <button className="btn-accent" onClick={handleCheckout}>Cobrar</button>
+            <button className="btn-accent checkout-button" disabled={checkingOut || cart.length === 0} onClick={handleCheckout}>{checkingOut ? 'Registrando…' : 'Cobrar venta'}</button>
           </div>
-        </div>
+        </aside>
       </div>
 
       <h3 style={{ marginTop: '2rem' }}>Historial de ventas</h3>

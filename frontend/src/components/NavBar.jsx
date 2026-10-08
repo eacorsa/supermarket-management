@@ -15,8 +15,13 @@ function NavBar() {
   };
 
   return (
-    <nav className="navbar">
-      <span className="navbar-brand">🥦 Supermercado</span>
+    <header className="store-header">
+      <div className="store-topbar"><span>Frescura y calidad, todos los días</span><span>Tu supermercado · Gestión de inventario</span></div>
+      <div className="store-brand-row">
+        <Link to="/dashboard" className="store-brand"><span className="store-brand-icon" aria-hidden="true">🥦</span><span>Supermercado<small>Todo lo que necesitas, en un solo lugar</small></span></Link>
+        <div className="store-session"><span>{roles.join(' · ') || 'Sin sesión'}</span><button className="btn-secondary" onClick={handleLogout}>Cerrar sesión</button></div>
+      </div>
+    <nav className="store-navigation" aria-label="Navegación principal">
       <div className="navbar-links">
         {visibleLinks.map((link) => (
           <Link
@@ -28,8 +33,8 @@ function NavBar() {
           </Link>
         ))}
       </div>
-      <button className="btn-logout" onClick={handleLogout}>Cerrar sesión</button>
     </nav>
+    </header>
   );
 }
 

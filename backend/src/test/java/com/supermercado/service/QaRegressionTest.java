@@ -2,6 +2,7 @@ package com.supermercado.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.supermercado.security.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class QaRegressionTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
+    @Autowired JwtUtil jwtUtil;
 
     private JsonNode call(MockHttpServletRequestBuilder request, String token, Object body, int expected) throws Exception {
         if (token != null) request.header("Authorization", "Bearer " + token);
@@ -92,6 +94,66 @@ class QaRegressionTest {
         assertEquals("Actualizado QA", updated.get("name").asText());
         assertEquals(created.get("categoryId"), updated.get("categoryId"));
         assertEquals(created.get("supplierId"), updated.get("supplierId"));
+        call(delete("/api/products/" + id), admin, null, 204);
+    }
+
+    @Test
+    void productImagesCanBeCreatedReplacedListedAndRemoved() throws Exception {
+        String admin = jwtUtil.generateAccessToken("admin", List.of("ADMIN"));
+        String cashier = jwtUtil.generateAccessToken("cajero", List.of("CAJERO"));
+        var body = new java.util.HashMap<>(product("IMG-" + UUID.randomUUID(), 20));
+        body.put("imageUrl", "  https://example.com/rice.jpg  ");
+        JsonNode created = call(post("/api/products"), admin, body, 201);
+        long id = created.get("id").asLong();
+        assertEquals("https://example.com/rice.jpg", created.get("imageUrl").asText());
+
+        JsonNode listed = null;
+        for (JsonNode entry : call(get("/api/products"), cashier, null, 200)) {
+            if (entry.get("id").asLong() == id) listed = entry;
+        }
+        assertNotNull(listed);
+        assertEquals(created.get("imageUrl"), listed.get("imageUrl"));
+
+        body.put("imageUrl", "https://example.com/new-rice.png?v=2");
+        mvc.perform(put("/api/products/" + id).header("Authorization", "Bearer " + cashier)
+                .contentType("application/json").content(json.writeValueAsString(body)))
+                .andExpect(status().isForbidden());
+        assertEquals(body.get("imageUrl"), call(put("/api/products/" + id), admin, body, 200).get("imageUrl").asText());
+        body.put("imageUrl", null);
+        assertTrue(call(put("/api/products/" + id), admin, body, 200).get("imageUrl").isNull());
+        body.put("imageUrl", "   ");
+        assertTrue(call(put("/api/products/" + id), admin, body, 200).get("imageUrl").isNull());
+        call(delete("/api/products/" + id), admin, null, 204);
+
+        body.remove("imageUrl");
+        JsonNode legacy = call(post("/api/products"), admin, body, 201);
+        assertTrue(legacy.get("imageUrl").isNull());
+        call(delete("/api/products/" + legacy.get("id").asLong()), admin, null, 204);
+    }
+
+    @Test
+    void productImagesRejectUnsupportedMalformedAndOversizedUrlsWithoutChangingProduct() throws Exception {
+        String admin = jwtUtil.generateAccessToken("admin", List.of("ADMIN"));
+        var body = new java.util.HashMap<>(product("IMG-" + UUID.randomUUID(), 20));
+        body.put("imageUrl", "http://example.com/original.jpg");
+        long id = call(post("/api/products"), admin, body, 201).get("id").asLong();
+        for (String invalid : List.of("javascript:alert(1)", "data:image/png;base64,abc", "/local.jpg", "https://",
+                "https://example.com/bad image.jpg", "https://user:password@example.com/image.jpg",
+                "https://example.com/" + "a".repeat(2048))) {
+            body.put("sku", "IMG-INVALID-" + UUID.randomUUID());
+            body.put("imageUrl", invalid);
+            String payload = json.writeValueAsString(body);
+            mvc.perform(post("/api/products").header("Authorization", "Bearer " + admin)
+                    .contentType("application/json").content(payload)).andExpect(status().isBadRequest());
+            mvc.perform(put("/api/products/" + id).header("Authorization", "Bearer " + admin)
+                    .contentType("application/json").content(payload)).andExpect(status().isBadRequest());
+        }
+        JsonNode unchanged = null;
+        for (JsonNode entry : call(get("/api/products"), admin, null, 200)) {
+            if (entry.get("id").asLong() == id) unchanged = entry;
+        }
+        assertNotNull(unchanged);
+        assertEquals("http://example.com/original.jpg", unchanged.get("imageUrl").asText());
         call(delete("/api/products/" + id), admin, null, 204);
     }
 

@@ -9,6 +9,7 @@ public class ProductResponse {
     private Long id;
     private String name;
     private String sku;
+    private String imageUrl;
     private String categoryName;
     private Long categoryId;
     private Long supplierId;
