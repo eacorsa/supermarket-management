@@ -50,6 +50,42 @@
 }
 
 .product-image-fields small { color: var(--color-muted); }
+.product-active-field input[type="checkbox"] { width: auto; accent-color: var(--color-primary); }
+.barcode-scanner label { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-weight: 600; margin-bottom: 12px; }
+.barcode-scanner label small { color: var(--color-muted); font-weight: 400; }
+.barcode-scanner > div { display: flex; gap: 12px; }
+.barcode-scanner input { flex: 1; min-width: 0; font-family: Consolas, monospace; }
+.barcode-scanner > small { display: block; margin-top: 10px; color: var(--color-muted); }
+.pos-message { margin: 12px 0 24px; padding: 12px 16px; border-radius: 8px; background: var(--color-primary-light); overflow-wrap: anywhere; }
+.pos-message.error { background: #fff3e0; color: #7a4200; border-left: 4px solid var(--color-accent); }
+.pos-message.success { color: var(--color-primary-dark); border-left: 4px solid var(--color-primary); }
+.cart-items .cart-quantity { display: flex; gap: 6px; align-items: center; flex: none; }
+.cart-quantity input { width: 66px; padding: 7px; text-align: center; }
+.cart-quantity button { padding: 6px 10px; }
+.sale-cart label { margin-top: 16px; }
+.sale-cart .checkout-button { margin-top: 16px; }
+.pos-total { border-top: 1px solid var(--color-border); padding-top: 16px; color: var(--color-primary-dark); }
+.table-scroll { overflow-x: auto; margin-bottom: 24px; }
+.sales-history-heading { margin-top: 32px; }
+.sales-history-heading h2 { margin: 0; }
+.receipt-panel { margin-top: 24px; }
+.ticket-content { max-width: 360px; margin: 0 auto; font-family: Consolas, monospace; font-size: 0.85rem; }
+.ticket-content h2, .pos-receipt-print h2 { text-align: center; }
+.ticket-content table, .pos-receipt-print table { width: 100%; border-collapse: collapse; }
+.ticket-content th, .ticket-content td, .pos-receipt-print th, .pos-receipt-print td { text-align: left; vertical-align: top; padding: 8px 3px; border-bottom: 1px dashed #aaa; overflow-wrap: anywhere; }
+.ticket-content td small, .pos-receipt-print td small { display: block; font-size: 0.75em; }
+.ticket-content dl > div, .pos-receipt-print dl > div { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.ticket-content dd, .pos-receipt-print dd { margin: 0; }
+.ticket-total { font-size: 1.2em; font-weight: bold; }
+.ticket-actions { display: flex; justify-content: center; gap: 12px; margin-top: 24px; }
+.pos-receipt-print { display: none; }
+@media (max-width: 600px) { .barcode-scanner > div { flex-direction: column; } .barcode-scanner { padding: 16px; } }
+@media print {
+  body:has(> .pos-receipt-print) > :not(.pos-receipt-print) { display: none !important; }
+  body:has(> .pos-receipt-print) { background: white; color: black; margin: 0; }
+  .pos-receipt-print { display: block; width: 72mm; max-width: 100%; margin: 0 auto; font: 11px Consolas, monospace; }
+  .pos-receipt-print h2, .pos-receipt-print p { color: black; }
+}
 .product-image-editor .product-image { flex-shrink: 0; }
 .pos-product { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 .pos-product-info { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }

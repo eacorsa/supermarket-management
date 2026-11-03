@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findBySku(String sku);
+    Optional<Product> findByBarcode(String barcode);
 
     @Query("SELECT p FROM Product p WHERE p.minStock IS NOT NULL AND p.stock <= p.minStock")
     List<Product> findLowStockProducts();

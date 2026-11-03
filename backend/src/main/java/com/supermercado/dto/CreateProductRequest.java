@@ -14,6 +14,11 @@ public class CreateProductRequest {
     @NotBlank
     private String sku;
 
+    @Size(max = 255, message = "El código de barras no puede superar 255 caracteres")
+    private String barcode;
+
+    private Boolean active;
+
     @Size(max = 2048, message = "La URL de imagen no puede superar 2048 caracteres")
     private String imageUrl;
 

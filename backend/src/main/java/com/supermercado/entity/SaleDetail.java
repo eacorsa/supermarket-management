@@ -25,6 +25,10 @@ public class SaleDetail {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    private String productName;
+    private String productSku;
+    private String productBarcode;
+
     @Column(nullable = false)
     private Integer quantity;
 

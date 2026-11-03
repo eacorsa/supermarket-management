@@ -21,6 +21,16 @@ public class Product extends Auditable {
     @Column(nullable = false, unique = true)
     private String sku;
 
+    @Column(length = 255, unique = true)
+    private String barcode;
+
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
+
+    @Version
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private long version;
+
     @Column(length = 2048)
     private String imageUrl;
 

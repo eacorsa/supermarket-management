@@ -35,4 +35,16 @@ public class SaleController {
     public ResponseEntity<List<SaleResponse>> getAllSales() {
         return ResponseEntity.ok(saleService.getAllSales());
     }
+
+    @PostMapping("/quote")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO')")
+    public ResponseEntity<SaleResponse> quoteSale(@Valid @RequestBody CreateSaleRequest request) {
+        return ResponseEntity.ok(saleService.quoteSale(request));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO')")
+    public ResponseEntity<SaleResponse> getSale(@PathVariable Long id) {
+        return ResponseEntity.ok(saleService.getSale(id));
+    }
 }

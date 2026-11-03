@@ -9,6 +9,10 @@ import com.supermercado.repository.CategoryRepository;
 import com.supermercado.repository.ProductRepository;
 import com.supermercado.repository.SupplierRepository;
 import com.supermercado.service.ProductService;
+import com.supermercado.service.Barcode;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -68,10 +72,32 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ProductResponse getByBarcode(String value) {
+        String barcode = Barcode.normalize(value);
+        if (barcode == null) throw new IllegalArgumentException("Introduce un código de barras");
+        Product product = productRepository.findByBarcode(barcode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe un producto con ese código de barras"));
+        if (!product.isActive()) throw new IllegalStateException("El producto está inactivo: " + product.getName());
+        if (product.getSalePrice() == null || !Double.isFinite(product.getSalePrice()) || product.getSalePrice() <= 0)
+            throw new IllegalStateException("El producto no tiene un precio de venta válido: " + product.getName());
+        if (product.getStock() == null || product.getStock() <= 0)
+            throw new IllegalStateException("Producto sin existencias: " + product.getName());
+        return toResponse(product);
+    }
+
     private void applyRequest(Product product, CreateProductRequest request) {
         String imageUrl = validateImageUrl(request.getImageUrl());
+        String barcode = Barcode.normalize(request.getBarcode());
+        if (barcode != null) productRepository.findByBarcode(barcode).ifPresent(existing -> {
+            if (!existing.getId().equals(product.getId()))
+                throw new IllegalStateException("Ya existe un producto con ese código de barras");
+        });
         product.setName(request.getName());
         product.setSku(request.getSku());
+        product.setBarcode(barcode);
+        if (request.getActive() != null) product.setActive(request.getActive());
         product.setImageUrl(imageUrl);
         product.setPurchasePrice(request.getPurchasePrice());
         product.setSalePrice(request.getSalePrice());
@@ -122,6 +148,8 @@ public class ProductServiceImpl implements ProductService {
         response.setId(product.getId());
         response.setName(product.getName());
         response.setSku(product.getSku());
+        response.setBarcode(product.getBarcode());
+        response.setActive(product.isActive());
         response.setImageUrl(product.getImageUrl());
         response.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
         response.setSupplierId(product.getSupplier() != null ? product.getSupplier().getId() : null);

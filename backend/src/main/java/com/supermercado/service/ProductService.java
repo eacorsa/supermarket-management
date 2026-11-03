@@ -8,6 +8,7 @@ import java.util.List;
 public interface ProductService {
     ProductResponse createProduct(CreateProductRequest request);
     List<ProductResponse> getAllProducts();
+    ProductResponse getByBarcode(String barcode);
     ProductResponse updateProduct(Long id, CreateProductRequest request);
     void deleteProduct(Long id);
 }
