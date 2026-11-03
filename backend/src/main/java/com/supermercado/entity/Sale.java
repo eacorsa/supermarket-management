@@ -19,6 +19,20 @@ public class Sale extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private long version;
+
+    @Column(unique = true, length = 36)
+    private String checkoutKey;
+
+    @Column(length = 64)
+    private String checkoutFingerprint;
+
+    private Double cashReceived;
+    private Double cardAmount;
+    private Double changeAmount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;

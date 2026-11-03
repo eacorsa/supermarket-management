@@ -8,6 +8,10 @@ import java.util.List;
 @Data
 public class SaleResponse {
     private Long id;
+    private String checkoutKey;
+    private Double cashReceived;
+    private Double cardAmount;
+    private Double changeAmount;
     private String customerName;
     private String cashierName;
     private LocalDateTime saleDate;

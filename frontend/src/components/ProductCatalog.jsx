@@ -9,7 +9,7 @@ export default function ProductCatalog({ products, loading, error, onRetry, rend
   const categories = [...new Set(products.map(p => p.categoryName || 'Sin categoría'))].sort((a, b) => a.localeCompare(b, 'es'));
   const normalize = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const filtered = products.filter(product => {
-    const matchesSearch = normalize(`${product.name} ${product.sku}`).includes(normalize(search.trim()));
+    const matchesSearch = normalize(`${product.name} ${product.sku} ${product.barcode || ''}`).includes(normalize(search.trim()));
     const matchesCategory = !category || (product.categoryName || 'Sin categoría') === category;
     const matchesStock = stockFilter === 'all' || (stockFilter === 'available' ? product.stock > 0 : product.stock <= 0);
     return matchesSearch && matchesCategory && matchesStock;
@@ -34,7 +34,7 @@ export default function ProductCatalog({ products, loading, error, onRetry, rend
       {loading ? <div className="catalog-empty" role="status">Cargando productos…</div> : error ? <div className="catalog-empty" role="alert"><p>{error}</p><button onClick={onRetry}>Volver a intentar</button></div> : filtered.length === 0 ? <div className="catalog-empty"><h3>No hay productos para mostrar</h3><p>Prueba con otro nombre, categoría o disponibilidad.</p><button className="btn-secondary" onClick={() => { setSearch(''); setCategory(''); setStockFilter('all'); }}>Limpiar filtros</button></div> : <div className="product-grid">
         {filtered.map(product => <article className="product-card" key={product.id}>
           <div className="product-card-visual">
-            <span className={`product-stock-badge ${product.stock <= 0 ? 'out-of-stock' : product.minStock != null && product.stock <= product.minStock ? 'low-stock' : ''}`}>{product.stock <= 0 ? 'Agotado' : product.minStock != null && product.stock <= product.minStock ? 'Stock bajo' : 'Disponible'}</span>
+            <span className={`product-stock-badge ${product.active === false || product.stock <= 0 ? 'out-of-stock' : product.minStock != null && product.stock <= product.minStock ? 'low-stock' : ''}`}>{product.active === false ? 'Inactivo' : product.stock <= 0 ? 'Agotado' : product.minStock != null && product.stock <= product.minStock ? 'Stock bajo' : 'Disponible'}</span>
             <ProductImage imageUrl={product.imageUrl} name={product.name} sku={product.sku} />
           </div>
           <div className="product-card-body"><strong className="product-price">${Number(product.salePrice).toFixed(2)}</strong><h3>{product.name}</h3><p className="product-unit">{product.unitOfMeasure || 'Unidad'} · {product.stock} en stock</p><span className="product-sku">SKU: {product.sku}</span>{renderAction && <div className="product-card-actions">{renderAction(product)}</div>}</div>

@@ -9,6 +9,8 @@ import ProductCatalog from '../components/ProductCatalog';
 const emptyForm = {
   name: '',
   sku: '',
+  barcode: '',
+  active: true,
   imageUrl: '',
   purchasePrice: '',
   salePrice: '',
@@ -52,6 +54,8 @@ function ProductsPage() {
       await api.request({ method: editingId === null ? 'post' : 'put', url: editingId === null ? '/products' : `/products/${editingId}`, data: {
         name: form.name,
         sku: form.sku,
+        barcode: form.barcode.trim() || null,
+        active: form.active,
         imageUrl: form.imageUrl.trim() || null,
         purchasePrice: Number(form.purchasePrice),
         salePrice: Number(form.salePrice),
@@ -95,6 +99,10 @@ function ProductsPage() {
         <input placeholder="Nombre" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
         </label><label>SKU
         <input placeholder="SKU" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
+        </label><label>Código de barras (opcional)
+        <input maxLength={255} autoComplete="off" placeholder="Escanea o escribe el código" value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }} />
+        </label><label className="product-active-field"><span>Disponibilidad para venta</span>
+        <span><input type="checkbox" checked={form.active} onChange={e => setForm({ ...form, active: e.target.checked })} /> Producto activo</span>
         </label><label>Precio de compra
         <input type="number" min="0" step="0.01" placeholder="Precio compra" value={form.purchasePrice} onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })} required />
         </label><label>Precio de venta
@@ -119,7 +127,7 @@ function ProductsPage() {
         <button type="button" className="btn-secondary" disabled={saving} onClick={() => setEditorOpen(false)}>Cancelar</button>
       </form></dialog>}
 
-      <ProductCatalog products={products} loading={loading} error={loadError} onRetry={loadProducts} renderAction={canManage ? product => <><button className="btn-secondary" disabled={saving} onClick={() => { setEditingId(product.id); setForm({ ...product, imageUrl: product.imageUrl ?? '', minStock: product.minStock ?? '', unitOfMeasure: product.unitOfMeasure ?? '' }); setEditorOpen(true); }}>Editar</button><button className="product-delete-button" aria-label={`Eliminar ${product.name}`} disabled={saving} onClick={() => handleDelete(product.id)}>Eliminar</button></> : undefined} />
+      <ProductCatalog products={products} loading={loading} error={loadError} onRetry={loadProducts} renderAction={canManage ? product => <><button className="btn-secondary" disabled={saving} onClick={() => { setEditingId(product.id); setForm({ ...product, barcode: product.barcode ?? '', active: product.active !== false, imageUrl: product.imageUrl ?? '', minStock: product.minStock ?? '', unitOfMeasure: product.unitOfMeasure ?? '' }); setEditorOpen(true); }}>Editar</button><button className="product-delete-button" aria-label={`Eliminar ${product.name}`} disabled={saving} onClick={() => handleDelete(product.id)}>Eliminar</button></> : undefined} />
       </div>
     </div>
   );

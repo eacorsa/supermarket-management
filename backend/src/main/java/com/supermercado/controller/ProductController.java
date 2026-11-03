@@ -36,6 +36,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.updateProduct(id, request));
     }
 
+    @GetMapping("/barcode")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'CAJERO', 'ALMACENISTA')")
+    public ResponseEntity<ProductResponse> getByBarcode(@RequestParam String code) {
+        return ResponseEntity.ok(productService.getByBarcode(code));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('GERENTE') or hasRole('ALMACENISTA')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
